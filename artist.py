@@ -17,9 +17,13 @@ def scale_down(image, new_w):
 
 
 def color_convert(image_array, x, y):
-    red = str(int(51 * round(image_array[x, y, 0] / 51)/51))
-    grn = str(int(51 * round(image_array[x, y, 1] / 51)/51))
-    blu = str(int(51 * round(image_array[x, y, 2] / 51)/51))
+    colors = (0, 95, 135, 175, 215, 255)
+    red = str(colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 0]))))
+    grn = str(colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 1]))))
+    blu = str(colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 2]))))
+#    red = str(int(51 * round(image_array[x, y, 0] / 51)/51))
+#    grn = str(int(51 * round(image_array[x, y, 1] / 51)/51))
+#    blu = str(int(51 * round(image_array[x, y, 2] / 51)/51))
     color_string = red + grn + blu
 
     return color_string
@@ -29,6 +33,7 @@ def img_convert(image_array):
     (w, h, colors) = image_array.shape
     color_string = ''
     last_color = ''
+    flag = 0
     for x in range(0, w-1):
         for y in range(0, h-1):
             new_color = color_convert(image_array, x, y)
@@ -42,15 +47,18 @@ def img_convert(image_array):
             print('\\\\' + color_string)
             color_string = ''
             last_color = ''
+            flag = 1
+    if flag == 1:
+        print('\\\\' + color_string)
 
     return color_string
 
 
 # image = Image.open('Osmium3.jpg')
-image = Image.open('elf3.jpg')
+image = Image.open('sorrel.jpg')
 print('Image opened.')
 
-standard = 40
+standard = 50
 image_sc = scale_down(image, standard)
 image_sc.show()
 
