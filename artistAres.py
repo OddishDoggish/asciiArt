@@ -5,7 +5,6 @@ from scipy.spatial import distance
 from PIL import ImageFont
 from PIL import Image
 from PIL import ImageDraw
-import filter
 
 def scale_down(image, new_w):
     cursor = 2  # approximate ratio of cursor as pixel
@@ -19,13 +18,13 @@ def scale_down(image, new_w):
 
 def color_convert(image_array, x, y):
     colors = (0, 95, 135, 175, 215, 255)
-    red = str(colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 0]))))
-    grn = str(colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 1]))))
-    blu = str(colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 2]))))
+    red = colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 0])))*36
+    grn = colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 1])))*6
+    blu = colors.index(min(colors, key=lambda n: abs(n - image_array[x, y, 2])))
 #    red = str(int(51 * round(image_array[x, y, 0] / 51)/51))
 #    grn = str(int(51 * round(image_array[x, y, 1] / 51)/51))
 #    blu = str(int(51 * round(image_array[x, y, 2] / 51)/51))
-    color_string = red + grn + blu
+    color_string = str(red + grn + blu + 16)
 
     return color_string
 
@@ -41,36 +40,23 @@ def img_convert(image_array):
             if new_color == last_color:
                 color_string = color_string + " "
             else:
-                color_string = color_string + "|[" + new_color + " "
+                color_string = color_string + "%X" + new_color + " "
             last_color = new_color
-        color_string = color_string[0:len(color_string)-1] + "|[" + last_color + "|_|/"
-        if len(color_string) > 7700:
-            print('\\\\' + color_string)
-            color_string = ''
-            last_color = ''
-            flag = 1
-    print('\\\\' + color_string)
+        color_string = color_string[0:len(color_string)-1] + "%X" + last_color + " %xn%r%X" + last_color
+    print('think ' + color_string)
 
     return color_string
 
 
 # image = Image.open('Osmium3.jpg')
-image = Image.open('sorrel.jpg')
+image = Image.open('cake.jpg')
 print('Image opened.')
-
-"""
-image_k = filter.kuwahara(image)
-image = Image.fromarray(image_k)
-image.show()
-"""
 
 standard = 80
 image_sc = scale_down(image, standard)
 image_sc.show()
 
-#image_k = filter.kuwahara(image_sc)
-
 image_array = np.array(image_sc)
+
 art_string = img_convert(image_array)
 
-#art_string = img_convert(image_k)
