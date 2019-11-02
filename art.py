@@ -8,24 +8,22 @@ from PIL import ImageDraw
 import filter
 
 m = 8   # number of pixels of a letter (x)
-w = 80  # number of characters across (x)
+w = 60  # number of characters across (x)
 n = 16  # number of pixels of a letter (y)
-channels = 1 # 3 for RGB, 1 for grayscale
-white = (255,255,255)
-black = (0,0,0)
+
+white = 255
+black = 0
 
 foreground = white
 background = black
 
 fontname = "cour.ttf"
 
-def scale_image(image, new_width, height_factor, channels):
-    """Resizes an image preserving the aspect ratio.
+def scale_image(image, new_width, height_factor):
     """
-    if channels == 3:
-        image = image.convert("RGB")
-    else:
-        image = image.convert("L")
+    Resizes an image preserving the aspect ratio.
+    """
+    image = image.convert("L")
     (original_width, original_height) = image.size
     aspect_ratio = original_height/original_width
     new_height = height_factor * round(aspect_ratio * new_width / height_factor)
@@ -36,30 +34,27 @@ def scale_image(image, new_width, height_factor, channels):
 #    return image.convert('L')
 
 
-def letterImage(letter, fontname, foreground, background, width, height, channels):
+def letterImage(letter, fontname, foreground, background, width, height):
     font = ImageFont.truetype(fontname, 10)
-    img=Image.new("RGB", (width, height), background)
+    img=Image.new("L", (width, height), background)
     draw = ImageDraw.Draw(img)
     draw.text((0, 0), letter, foreground, font=font)
     draw = ImageDraw.Draw(img)
-    if channels != 3:
-        img = img.convert("L")
-#    img.save(letter + "_test.png")
     return img
 
 
-def letterArray(fontname, foreground, background, m, n, channels):
-    letter_array = np.array(letterImage(chr(32), fontname, foreground, background, m, n, channels))
+def letterArray(fontname, foreground, background, m, n):
+    letter_array = np.array(letterImage(chr(32), fontname, foreground, background, m, n))
     letter_array = np.reshape(letter_array, letter_array.size)
     for letter in range(33, 126):
-        letter_image = np.array(letterImage(chr(letter), fontname, foreground, background, m, n, channels))
+        letter_image = np.array(letterImage(chr(letter), fontname, foreground, background, m, n))
         letter_image = np.reshape(letter_image,letter_image.size)
         letter_array = np.concatenate((letter_array,letter_image))
-    letter_array = np.reshape(letter_array,(126-32,m*n*channels))
+    letter_array = np.reshape(letter_array,(126-32,m*n))
     return letter_array
 
 
-def compare_partial(image, letter_image, m, n, channels):
+def compare_partial(image, letter_image, m, n):
     picture = np.array(image)
     chosen_str = ''
     (width, height) = image.size
@@ -70,7 +65,7 @@ def compare_partial(image, letter_image, m, n, channels):
             for letter in range(0,94):
                 pic_vector = np.reshape(picture[k:k+n,j:j+m],picture[k:k+n,j:j+m].size)
                 letter_vector = letter_image[letter,:]
-                dist = distance.mahalanobis(pic_vector, letter_vector, np.identity(m*n*channels))
+                dist = distance.mahalanobis(pic_vector, letter_vector, np.identity(m*n))
                 if choice > dist:
                     choice = dist
                     if letter == 91 or letter == 92:
@@ -83,18 +78,31 @@ def compare_partial(image, letter_image, m, n, channels):
 
 
 #image = Image.open('Osmium3.jpg')
-#image = Image.open('dolphinBW.png')
-image = Image.open('sunflower.jpg')
+image = Image.open('cup.jpg')
+image = image.convert("RGB")
+#image = Image.open('sunflower.jpg')
 print('Image opened.')
 
+
+image = scale_image(image, m*w, n)
 image = filter.edge(image)
+image = filter.blur(image)
 
-image_sc = scale_image(image, m*w, n, channels)
-image_sc.show()
+(width, height) = image.size
+image_array = np.array(image)
+for k in range(height):
+    for j in range(width):
+        if image_array[k, j] < 10:
+            image_array[k, j] = 0
+        else:
+            image_array[k, j] = 255
 
-letter_array = letterArray(fontname, foreground, background, m, n, channels)
+image = Image.fromarray(image_array)
+image.show()
 
-ascii_string = compare_partial(image_sc, letter_array, m, n, channels)
+letter_array = letterArray(fontname, foreground, background, m, n)
+
+ascii_string = compare_partial(image, letter_array, m, n)
 
 print(ascii_string)
 

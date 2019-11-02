@@ -34,9 +34,19 @@ def kuwahara(image):
 def edge(image):
     image_array = np.array(image)
     kernel_edge = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
-    sfedge = signal.convolve2d(image_array[:, :, 1], kernel_edge, mode='same')
+    sfedge = signal.convolve2d(image_array, kernel_edge, mode='same')
     picture = Image.fromarray(sfedge)
     return picture
+
+
+def blur(image):
+    image_array = np.array(image)
+    kernel_blur = np.array([[1/256, 4/256, 6/256, 4/256, 1/256], [4/256, 16/256, 24/256, 16/256, 4/256], [6/256,
+        24/256, 36/256, 24/256, 6/256], [4/256, 16/256, 24/256, 16/256, 4/256], [1/256, 4/256, 6/256, 4/256, 1/256]])
+    sfblur = signal.convolve2d(image_array, kernel_blur, mode='same')
+    picture = Image.fromarray(sfblur)
+    return picture
+
 
 
 """

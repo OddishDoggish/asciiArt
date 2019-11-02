@@ -55,7 +55,7 @@ def img_convert(image_array):
 
 
 # image = Image.open('Osmium3.jpg')
-image = Image.open('sorrel.jpg')
+image = Image.open('cup.jpg')
 print('Image opened.')
 
 """
@@ -64,7 +64,7 @@ image = Image.fromarray(image_k)
 image.show()
 """
 
-standard = 80
+standard = 40
 image_sc = scale_down(image, standard)
 image_sc.show()
 
