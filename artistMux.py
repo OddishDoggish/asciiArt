@@ -56,20 +56,20 @@ def img_convert(image_array):
 
        # color_string = color_string + "%R"
         color_string = color_string[0:len(color_string) - 2] + last_color + "%b%Xn%R" + last_color
-        """ if len(color_string) > 4000:
-            print('think ' + color_string)
+        if len(color_string) > 15000:
+            print('think ' + color_string[0:len(color_string) - (5+len(last_color))])
             color_string = ''
-            """
 
     print('think ' + color_string)
 
     return color_string
 
 
-# image = Image.open('Osmium3.jpg')
+#image = Image.open('Osmium3.jpg')
 #image = Image.open('lemons.jpg')
 #image = Image.open('puffin.jpg')
-image = Image.open('Eline_Powell_GOT.jpg')
+#image = Image.open('Eline_Powell_GOT.jpg')
+image = Image.open('bikini.jpg')
 print('Image opened.')
 
 standard = 80
