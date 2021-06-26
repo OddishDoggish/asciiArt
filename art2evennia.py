@@ -18,14 +18,15 @@ class MainWindow:
         There will be 3 columns. The first is (colorframe -> colorgrid) for the color grid. The second (text_frame) is
         for the text windows. The third (toolbar) is for the photo (if used) and the command buttons.
         """
-        main.rowconfigure(0, minsize=200, weight=1)
-        main.columnconfigure(1, minsize=400, weight=1)
+        main.rowconfigure(0, weight=1)
+        main.columnconfigure(1, minsize=200, weight=1)
         main.columnconfigure(2, minsize=200, weight=1)
 
         self.colorframe = Frame()
-        self.colorgrid = Canvas(self.colorframe)
-        self.scroll_color_y = Scrollbar(self.colorgrid, orient=VERTICAL, command=self.colorgrid.yview)
-        self.colorgrid.configure(yscrollcommand=self.scroll_color_y.set)
+        self.colorcanvas = Canvas(self.colorframe)
+        self.colorgrid = Frame(self.colorframe)
+        self.scroll_color_y = Scrollbar(self.colorframe, orient=VERTICAL, command=self.colorcanvas.yview)
+
         self.btn000 = Button(self.colorgrid, text="000", fg="white", bg="#000000",
                              command=partial(self.color, "000")).grid(row=0, column=0, sticky="ew", padx=2)
         self.btn100 = Button(self.colorgrid, text="100", fg="white", bg="#5F0000",
@@ -458,17 +459,23 @@ class MainWindow:
                              command=partial(self.color, "455")).grid(row=35, column=4, sticky="ew", padx=2)
         self.btn555 = Button(self.colorgrid, text="555", fg="white", bg="#FFFFFF",
                              command=partial(self.color, "555")).grid(row=35, column=5, sticky="ew", padx=2)
-        self.scroll_color_y.grid(row=0, rowspan=36, column=6, sticky="ns")
+
+        self.colorcanvas.create_window(0, 0, window=self.colorgrid, anchor='nw')
+        self.colorcanvas.update_idletasks()
+        self.colorcanvas.configure(scrollregion=self.colorcanvas.bbox('all'), yscrollcommand=self.scroll_color_y.set,
+                                   width=200)
+        self.colorcanvas.pack(fill='both', side='left')
+        self.scroll_color_y.pack(fill='y', side='right')
 
         self.text_frame = Frame()
-        self.text_frame.rowconfigure(0, minsize=200, weight=1)
+        self.text_frame.rowconfigure(0, minsize=200, weight=2)
         self.text_frame.rowconfigure(1, minsize=100, weight=1)
         self.text_frame.columnconfigure(0, weight=1)
         self.write_frame = Frame(self.text_frame)
         self.write_frame.rowconfigure(0, minsize=200, weight=1)
         self.write_frame.columnconfigure(0, weight=1)
         self.writing = Text(self.write_frame, insertbackground="white", background="black", fg="white", width=100,
-                            borderwidth=5, wrap=tk.NONE)
+                            borderwidth=5, wrap=tk.NONE, height=30)
         self.scroll_write_x = Scrollbar(self.write_frame, orient=HORIZONTAL, command=self.writing.xview)
         self.scroll_write_y = Scrollbar(self.write_frame, orient=VERTICAL, command=self.writing.yview)
         self.writing['xscrollcommand'] = self.scroll_write_x.set
@@ -476,7 +483,7 @@ class MainWindow:
         self.writing.grid(row=0, column=0, sticky="nsew")
         self.scroll_write_y.grid(row=0, column=1, sticky="ns")
         self.scroll_write_x.grid(row=1, column=0, sticky="ew")
-        self.encoding = Text(self.text_frame, borderwidth=5)
+        self.encoding = Text(self.text_frame, borderwidth=5, height=15)
         self.write_frame.grid(row=0, column=0, sticky="nsew")
         self.encoding.grid(row=1, column=0, sticky="nsew")
 
@@ -497,7 +504,7 @@ class MainWindow:
         self.btn_copy = Button(self.toolbar, text="Copy to Clipboard", command=self.copy_to_clipboard)
         self.btn_quit = Button(self.toolbar, text="QUIT", fg="red", command=main.destroy)
         self.encode = Button(self.toolbar, text="ENCODE", background="black", foreground="white", command=self.encode_text)
-        self.decode = Button(self.toolbar, text="DECODE", command=self.decode_text)
+        self.decode = Button(self.toolbar, text="DECODE", background="white", command=self.decode_text)
         self.ascii_mark = Button(self.toolbar, text="Mark as ASCII", command=self.mark_as_ascii)
         self.ascii_toggle = Button(self.toolbar, text="Toggle ASCII view", command=self.toggle_ascii)
         self.btn_color = Button(self.toolbar, text="Get color of selected:", command=self.which_color)
@@ -526,8 +533,7 @@ class MainWindow:
         self.lbl_color.grid(row=6, column=1, sticky="ew", padx=5)
         self.btn_quit.grid(row=7, sticky="ew", padx=5)
 
-        self.colorgrid.grid(row=0, column=0, sticky="nsew")
-        self.colorframe.grid(row=0, column=0, sticky="ns")
+        self.colorframe.grid(row=0, column=0, sticky="nsew")
         self.text_frame.grid(row=0, column=1, sticky="ns")
         self.toolbar.grid(row=0, column=2, sticky="n")
 
