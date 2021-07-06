@@ -503,7 +503,8 @@ class MainWindow:
         self.btn_go = Button(self.toolbar, text="CONVERT IMAGE!", fg="green", command=self.go_convert_image)
         self.btn_copy = Button(self.toolbar, text="Copy to Clipboard", command=self.copy_to_clipboard)
         self.btn_quit = Button(self.toolbar, text="QUIT", fg="red", command=main.destroy)
-        self.encode = Button(self.toolbar, text="ENCODE", background="black", foreground="white", command=self.encode_text)
+        self.encode = Button(self.toolbar, text="ENCODE", background="black", foreground="white",
+                             command=self.encode_text)
         self.decode = Button(self.toolbar, text="DECODE", background="white", command=self.decode_text)
         self.ascii_mark = Button(self.toolbar, text="Mark as ASCII", command=self.mark_as_ascii)
         self.ascii_toggle = Button(self.toolbar, text="Toggle ASCII view", command=self.toggle_ascii)
@@ -513,6 +514,7 @@ class MainWindow:
         if self.lbl_file["text"] == "No file selected.":
             self.idacat = Image.open(getpath("idacat.gif")).resize((200, 193))
             self.img = ImageTk.PhotoImage(self.idacat)
+            self.idacat.close()
             self.display_image = self.display_canvas.create_image(0, 0, anchor=NW, image=self.img)
 
         self.display_canvas.grid(row=0, column=0, columnspan=2)
@@ -529,9 +531,9 @@ class MainWindow:
         self.ascii_mark.grid(row=6, column=0, sticky="ew", padx=5)
         self.ascii_toggle.grid(row=6, column=1, sticky="ew", padx=5)
         self.clr = StringVar()
-        self.btn_color.grid(row=6, column=0, sticky="ew", padx=5)
-        self.lbl_color.grid(row=6, column=1, sticky="ew", padx=5)
-        self.btn_quit.grid(row=7, sticky="ew", padx=5)
+        self.btn_color.grid(row=7, column=0, sticky="ew", padx=5)
+        self.lbl_color.grid(row=7, column=1, sticky="ew", padx=5)
+        self.btn_quit.grid(row=8, sticky="ew", padx=5)
 
         self.colorframe.grid(row=0, column=0, sticky="nsew")
         self.text_frame.grid(row=0, column=1, sticky="ns")
@@ -842,7 +844,11 @@ class MainWindow:
         while True:
             location = self.writing.search(r"\|[0-5][0-5][0-5]|\|[=][a-z]", start, regexp=True, count=count)
             if location == "":
-                break
+                if code == "":
+                    break
+                else:
+                    self.writing.tag_add(code, start, tk.END)
+                    break
             if count.get() == 0:
                 break
             self.writing.tag_add(code, start, location)
@@ -903,6 +909,7 @@ class MainWindow:
             new_h = 200
             new_w = round(orig_w / orig_h * 200)
         self.img = ImageTk.PhotoImage(img_new.resize((new_w, new_h)))
+        img_new.close()
         self.display_canvas.itemconfig(self.display_image, image=self.img)
 
     def copy_to_clipboard(self):
@@ -913,12 +920,15 @@ class MainWindow:
         if self.lbl_file["text"] == "No file selected.":
             self.do_pick_file()
         image_file = Image.open(self.image_name)
+        if image_file.mode != "RGB":
+            image_file = image_file.convert(mode="RGB")
         cursor = 2  # ratio of cursor as pixel
         (orig_w, orig_h) = image_file.size
         aspect_ratio = orig_h / (orig_w * cursor)
         new_w = int(self.ent_size.get())
         new_h = round(aspect_ratio * new_w)
         image_array = np.array(image_file.resize((new_w, new_h)))
+        image_file.close()
         (w, h, colors) = image_array.shape
         color_string = ''
         last_color = ''
